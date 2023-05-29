@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Restaurant.Model\Restaurant.Model.csproj" />
+    <ProjectReference Include="..\Restaurant.Repository\Restaurant.Repository.csproj" />
+  </ItemGroup>
+
+</Project>
