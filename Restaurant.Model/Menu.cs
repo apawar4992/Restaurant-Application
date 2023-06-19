@@ -9,5 +9,9 @@
         public string? Type { get; set; }
 
         public string Category { get; set; } = string.Empty;
+
+        public string? Description { get; set; }
+
+        public string? ImageLink { get; set; }
     }
 }

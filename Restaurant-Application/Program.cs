@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Restaurant.Manager.Implementation;
 using Restaurant.Manager.Interfaces;
+using Restaurant.Model;
 using Restaurant.Repository.Implementation;
 using Restaurant.Repository.Interfaces;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
+var configuration = builder.Configuration;
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
@@ -19,14 +24,47 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:3000")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+        .AllowAnyMethod();
     });
 });
+
+var _jwtsetting = configuration.GetSection("JWTSetting");
+builder.Services.Configure<JWTSettings>(_jwtsetting);
 
 builder.Services.AddSingleton<IRestaurantManager, RestaurantManager>();
 builder.Services.AddSingleton<IRestaurantRepository, RestaurantRepository>();
 builder.Services.AddSingleton<IMenuManager, MenuManager>();
 builder.Services.AddSingleton<IMenuRepository, MenuRepository>();
+builder.Services.AddSingleton<IUserManager, UserManager>();
+builder.Services.AddSingleton<IUserRepository, UserRepository>();
+builder.Services.AddSingleton<IRegisterManager, RegisterManager>();
+builder.Services.AddSingleton<IRegisterRepository, RegisterRepository>();
+
+#region Authentication
+
+var authkey = configuration.GetValue<string>("JWTSetting:securitykey");
+
+builder.Services.AddAuthentication(item =>
+{
+    item.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    item.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    item.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(item =>
+{
+    item.RequireHttpsMetadata = true;
+    item.SaveToken = true;
+    item.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authkey)),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+#endregion
 
 var app = builder.Build();
 

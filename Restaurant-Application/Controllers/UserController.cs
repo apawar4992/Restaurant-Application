@@ -1,59 +1,63 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Restaurant.Manager.Interfaces;
+using Restaurant.Model;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
-namespace Restaurant_Application.Controllers
+namespace LibraryApp.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors()]
     [ApiController]
     public class UserController : ControllerBase
     {
-        [HttpGet]
-        public List<string> Get()
+        //private readonly LibraryDbContext context;
+        private readonly JWTSettings setting;
+        private readonly IUserManager _userManager;
+        public UserController(IOptions<JWTSettings> options, IUserManager userManager)
         {
-            return new List<string>();
+            setting = options.Value;
+            _userManager = userManager;
         }
 
         [HttpPost]
-        public bool Add()
+        [Route("Authenticate")]
+        public async Task<IActionResult> Authenticate([FromBody] UserCredentials userCredentials)
         {
-            try
-            {
+            var _user = await _userManager.GetUser(userCredentials);
 
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            if (_user == null)
+                return Unauthorized(new { message = "Invalid User Credentials" });
 
-            return true;
-        }
-
-        [HttpPut]
-        public bool Update()
-        {
-            try
+            var tokenhandler = new JwtSecurityTokenHandler();
+            var tokenkey = Encoding.UTF8.GetBytes(setting.SecurityKey);
+            IList<Claim> claims = new List<Claim>
             {
-            }
-            catch (Exception)
+                new Claim(ClaimTypes.Name, _user.Email),
+                new Claim(ClaimTypes.Role, _user.Role)
+            };
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                throw;
-            }
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddMinutes(20),
+                Issuer = setting.Issuer,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenkey), SecurityAlgorithms.HmacSha256)
+            };
+            var uid = Guid.NewGuid().ToString().Replace("-", "");
+            var token = tokenhandler.CreateToken(tokenDescriptor);
+            string finaltoken = tokenhandler.WriteToken(token);
 
-            return true;
-        }
-
-        [HttpDelete]
-        public bool Delete()
-        {
-            try
+            return Ok(new
             {
-                return true;
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
+                email = _user.Email,
+                code = 200,
+                token=finaltoken,
+                role=_user.Role,
+            });
         }
     }
 }

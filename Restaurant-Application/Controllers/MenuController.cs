@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Restaurant.Manager.Interfaces;
+using Restaurant.Model.Enums;
 
 namespace Restaurant_Application.Controllers
 {
@@ -28,19 +30,26 @@ namespace Restaurant_Application.Controllers
             }
         }
 
+        #region Get Menu
+
         [HttpGet]
         [Route("GetMenuByCategoryType")]
         public async Task<List<Restaurant.Model.Menu>> GetMenu(string categoryType)
         {
             try
             {
-                return await _menuManager.GetMenus(categoryType);
+                return await _menuManager.GetMenusByCategory(categoryType);
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+
+        #endregion
+
+        #region Get Menu types API
 
         [HttpGet]
         [Route("GetMenuTypes")]
@@ -56,7 +65,66 @@ namespace Restaurant_Application.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetMenus")]
+        public async Task<List<object>> GetMenus()
+        {
+            List<object> list = new List<object>();
+            try
+            {
+                List<string> menus = Enum.GetNames(typeof(MenuType)).ToList();
+                menus.ForEach(item =>
+                {
+                    list.Add(new
+                    {
+                        label = item,
+                        value = item
+                    });
+                });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return list;
+        }
+
+        #endregion
+
+        #region Get Categories
+
+        [HttpGet]
+        [Route("GetCategories")]
+        public async Task<List<object>> GetCategories()
+        {
+            List<object> list = new List<object>();
+            try
+            {
+                List<string> categories = Enum.GetNames(typeof(CategoryType)).ToList();
+                categories.ForEach(item =>
+                {
+                    list.Add(new
+                    {
+                        label = item,
+                        value = item
+                    });
+                });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return list;
+        }
+
+        #endregion
+
+        #region Add Menu
+
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public bool Add(Restaurant.Model.Menu menu)
         {
             try
@@ -71,7 +139,12 @@ namespace Restaurant_Application.Controllers
             return true;
         }
 
+        #endregion
+
+        #region Update
+
         [HttpPut]
+        [Authorize(Roles = "Admin")]
         public bool Update(string menuName, Restaurant.Model.Menu menu)
         {
             try
@@ -86,7 +159,12 @@ namespace Restaurant_Application.Controllers
             return true;
         }
 
+        #endregion
+
+        #region Delete
+
         [HttpDelete]
+        [Authorize(Roles = "Admin")]
         public async Task<bool> Delete(Restaurant.Model.Menu menu)
         {
             try
@@ -98,5 +176,7 @@ namespace Restaurant_Application.Controllers
                 throw;
             }
         }
+
+        #endregion
     }
 }

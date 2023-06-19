@@ -200,6 +200,9 @@ public partial class RestaurantContext : DbContext
             entity.Property(e => e.Fname).HasMaxLength(50);
             entity.Property(e => e.Lname).HasMaxLength(50);
             entity.Property(e => e.Password).HasMaxLength(50);
+            entity.Property(e => e.Email).HasMaxLength(30);
+            entity.Property(e => e.Role).HasMaxLength(30);
+
         });
 
         OnModelCreatingPartial(modelBuilder);

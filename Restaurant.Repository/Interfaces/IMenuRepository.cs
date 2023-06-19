@@ -6,7 +6,7 @@ namespace Restaurant.Repository.Interfaces
     {
         Task<List<Menu>> GetMenus();
 
-        Task<List<Menu>> GetMenus(string categoryType);
+        Task<List<Menu>> GetMenusByCategory(string categoryType);
 
         Task<List<string>> GetMenuTypes();
 

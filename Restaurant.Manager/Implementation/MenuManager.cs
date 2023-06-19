@@ -31,13 +31,13 @@ namespace Restaurant.Manager.Implementation
             return menus;
         }
 
-        public async Task<List<Menu>> GetMenus(string categoryType)
+        public async Task<List<Menu>> GetMenusByCategory(string categoryType)
         {
             _ = new List<Menu>();
             List<Menu> menus;
             try
             {
-                menus = await _menuRepository.GetMenus(categoryType);
+                menus = await _menuRepository.GetMenusByCategory(categoryType);
             }
             catch (Exception)
             {

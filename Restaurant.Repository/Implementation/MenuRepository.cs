@@ -25,7 +25,9 @@ namespace Restaurant.Repository.Implementation
                         Name = item.Name,
                         Category = item.Category,
                         Price = item.Price,
-                        Type = item.Type
+                        Type = item.Type,
+                        Description = item.Description,
+                        ImageLink = item.ImageLink,
                     });
                 });
             }
@@ -33,7 +35,7 @@ namespace Restaurant.Repository.Implementation
             return menuList;
         }
 
-        public async Task<List<Menu>> GetMenus(string categoryType)
+        public async Task<List<Menu>> GetMenusByCategory(string categoryType)
         {
             List<Menu> menuList = new List<Menu>();
             List<MenuRecord> menuRecords;
@@ -52,6 +54,8 @@ namespace Restaurant.Repository.Implementation
                         Category = item.Category,
                         Price = item.Price,
                         Type = item.Type,
+                        Description = item.Description,
+                        ImageLink = item.ImageLink
                     });
                 });
             }
@@ -82,17 +86,26 @@ namespace Restaurant.Repository.Implementation
 
         public async Task<bool> AddMenu(Menu Menu)
         {
-            MenuRecord record = new MenuRecord()
+            try
             {
-                Name = Menu.Name,
-                Price = Menu.Price,
-                Type = Menu.Type,
-                Category = Menu.Category,
-            };
-            using (RestaurantContext context = new RestaurantContext())
+                MenuRecord record = new MenuRecord()
+                {
+                    Name = Menu.Name,
+                    Price = Menu.Price,
+                    Type = Menu.Type,
+                    Category = Menu.Category,
+                    Description = Menu.Description,
+                    ImageLink = Menu.ImageLink
+                };
+                using (RestaurantContext context = new RestaurantContext())
+                {
+                    await context.Menus.AddAsync(record);
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
             {
-                await context.Menus.AddAsync(record);
-                await context.SaveChangesAsync();
+                throw;
             }
 
             return true;
@@ -113,6 +126,8 @@ namespace Restaurant.Repository.Implementation
                 menuRecord.Category = menu.Category;
                 menuRecord.Name = menu.Name;
                 menuRecord.Type = menu.Type;
+                menuRecord.Description = menu.Description;
+                menuRecord.ImageLink = menu.ImageLink;
 
                 await context.SaveChangesAsync();
             }
