@@ -11,7 +11,7 @@ public partial class MenuBillRecord
 
     public string Quantity { get; set; } = null!;
 
-    public string Price { get; set; } = null!;
+    public double Price { get; set; }
 
     public virtual BillRecord Order { get; set; } = null!;
 }

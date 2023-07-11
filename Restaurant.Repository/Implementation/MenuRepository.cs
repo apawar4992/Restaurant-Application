@@ -63,6 +63,31 @@ namespace Restaurant.Repository.Implementation
             return menuList;
         }
 
+        public async Task<Menu> GetMenusByName(string name)
+        {
+            Menu menu = new Menu();
+            MenuRecord menuRecord;
+            using (RestaurantContext context = new RestaurantContext())
+            {
+                menuRecord = await context.Menus.Where(item => item.Name.Equals(name)).FirstOrDefaultAsync();
+            }
+
+            if (menuRecord != null)
+            {
+                    menu = new Menu()
+                    {
+                        Name = menuRecord.Name,
+                        Category = menuRecord.Category,
+                        Price = menuRecord.Price,
+                        Type = menuRecord.Type,
+                        Description = menuRecord.Description,
+                        ImageLink = menuRecord.ImageLink
+                    };
+            }
+
+            return menu;
+        }
+
         public async Task<List<string>> GetMenuTypes()
         {
             List<string> menuTypes = new List<string>();
@@ -116,15 +141,16 @@ namespace Restaurant.Repository.Implementation
             MenuRecord menuRecord;
             using (RestaurantContext context = new RestaurantContext())
             {
-                menuRecord = await context.Menus.FindAsync(MenuName);
+                menuRecord = await context.Menus.FirstOrDefaultAsync(item => item.Name.Equals(MenuName));
                 if (menuRecord == null)
                 {
                     // Exception record not found.
+                    return false;
                 }
 
                 menuRecord.Price = menu.Price;
                 menuRecord.Category = menu.Category;
-                menuRecord.Name = menu.Name;
+                //menuRecord.Name = menu.Name;
                 menuRecord.Type = menu.Type;
                 menuRecord.Description = menu.Description;
                 menuRecord.ImageLink = menu.ImageLink;
@@ -135,15 +161,16 @@ namespace Restaurant.Repository.Implementation
             return true;
         }
 
-        public async Task<bool> DeleteMenu(Menu menu)
+        public async Task<bool> DeleteMenu(string menuName)
         {
             MenuRecord menuRecord;
             using (RestaurantContext context = new RestaurantContext())
             {
-                menuRecord = await context.Menus.FindAsync(menu.Name);
+                menuRecord = await context.Menus.Where(item => item.Name.Equals(menuName)).FirstOrDefaultAsync();
                 if (menuRecord == null)
                 {
                     // Exception Not found.
+                    return false;
                 }
 
                 context.Menus.Remove(menuRecord);

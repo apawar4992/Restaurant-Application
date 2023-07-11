@@ -47,6 +47,18 @@ namespace Restaurant.Manager.Implementation
             return menus;
         }
 
+        public async Task<Menu> GetMenusByName(string name)
+        {
+            try
+            {
+                return await _menuRepository.GetMenusByName(name);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<string>> GetMenuTypes()
         {
             try
@@ -83,11 +95,11 @@ namespace Restaurant.Manager.Implementation
             }
         }
 
-        public async Task<bool> DeleteMenu(Menu menu)
+        public async Task<bool> DeleteMenu(string menuName)
         {
             try
             {
-                return await _menuRepository.DeleteMenu(menu);
+                return await _menuRepository.DeleteMenu(menuName);
             }
             catch (Exception)
             {

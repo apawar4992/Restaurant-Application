@@ -39,6 +39,7 @@ builder.Services.AddSingleton<IUserManager, UserManager>();
 builder.Services.AddSingleton<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<IRegisterManager, RegisterManager>();
 builder.Services.AddSingleton<IRegisterRepository, RegisterRepository>();
+builder.Services.AddSingleton<ITokenManager, TokenManager>();
 
 #region Authentication
 
@@ -48,7 +49,7 @@ builder.Services.AddAuthentication(item =>
 {
     item.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     item.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    item.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    //item.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(item =>
 {
     item.RequireHttpsMetadata = true;

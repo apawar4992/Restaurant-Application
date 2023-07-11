@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
+﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Restaurant.Manager.Interfaces;
 using Restaurant.Model.Enums;
@@ -11,11 +10,24 @@ namespace Restaurant_Application.Controllers
     [EnableCors()]
     public class MenuController : ControllerBase
     {
+        #region Private Members
+        
         private IMenuManager _menuManager;
-        public MenuController(IMenuManager menuManager)
+        private ITokenManager _tokenManager;
+
+        #endregion
+        
+        #region Constructor
+
+        public MenuController(IMenuManager menuManager, ITokenManager tokenManager)
         {
             _menuManager = menuManager;
+            _tokenManager = tokenManager;
         }
+
+        #endregion
+        
+        #region Get Menu
 
         [HttpGet]
         public async Task<List<Restaurant.Model.Menu>> Get()
@@ -29,8 +41,6 @@ namespace Restaurant_Application.Controllers
                 throw;
             }
         }
-
-        #region Get Menu
 
         [HttpGet]
         [Route("GetMenuByCategoryType")]
@@ -46,6 +56,19 @@ namespace Restaurant_Application.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetMenuByName")]
+        public async Task<Restaurant.Model.Menu> GetMenuByName(string name)
+        {
+            try
+            {
+                return await _menuManager.GetMenusByName(name);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         #endregion
 
@@ -124,57 +147,84 @@ namespace Restaurant_Application.Controllers
         #region Add Menu
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public bool Add(Restaurant.Model.Menu menu)
+        //[Authorize]
+        public IActionResult Add(Restaurant.Model.Menu menu)
         {
             try
             {
-                _menuManager.AddMenu(menu);
+                var validation = _tokenManager.ValidateToken(GetTokenFromRequestHeader());
+                if (validation != TokenValidationError.Ok)
+                {
+                    return Unauthorized(new { message = validation.ToString() });
+                }
+
+                Task<bool> isTrue = _menuManager.AddMenu(menu);
+                return Ok(isTrue.Result);
             }
             catch (Exception)
             {
                 throw;
             }
-
-            return true;
         }
 
         #endregion
 
         #region Update
 
-        [HttpPut]
-        [Authorize(Roles = "Admin")]
-        public bool Update(string menuName, Restaurant.Model.Menu menu)
+        [HttpPut("{menuName}")]
+        //[Route("UpdateMenu")]
+        //[Authorize]
+        public IActionResult Update(string menuName, Restaurant.Model.Menu menu)
         {
             try
             {
-                _menuManager.UpdateMenu(menuName, menu);
+                var validation = _tokenManager.ValidateToken(GetTokenFromRequestHeader());
+                if (validation != TokenValidationError.Ok)
+                {
+                    return Unauthorized(new { message = validation.ToString() });
+                }
+
+                Task<bool> isTrue = _menuManager.UpdateMenu(menuName, menu);
+                return Ok(isTrue.Result);
             }
             catch (Exception)
             {
                 throw;
             }
-
-            return true;
         }
 
         #endregion
 
         #region Delete
 
-        [HttpDelete]
-        [Authorize(Roles = "Admin")]
-        public async Task<bool> Delete(Restaurant.Model.Menu menu)
+        [HttpDelete("{menuName}")]
+        //[Authorize(Roles = "Admin")]
+        public IActionResult Delete(string menuName)
         {
             try
             {
-                return await _menuManager.DeleteMenu(menu);
+                var validation = _tokenManager.ValidateToken(GetTokenFromRequestHeader());
+                if (validation != TokenValidationError.Ok)
+                {
+                    return Unauthorized(new { message = validation.ToString() });
+                }
+
+                Task<bool> isTrue = _menuManager.DeleteMenu(menuName);
+                return Ok(isTrue.Result);
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private string GetTokenFromRequestHeader()
+        {
+            return HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Trim();
         }
 
         #endregion

@@ -113,7 +113,9 @@ public partial class RestaurantContext : DbContext
             entity.Property(e => e.Category).HasMaxLength(30);
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.ImageLink).HasMaxLength(4000);
-            entity.Property(e => e.Price).HasMaxLength(20);
+            entity.Property(e => e.Price)
+             .HasColumnType("decimal(18, 2)")
+                .HasColumnName("Price");
             entity.Property(e => e.Type).HasMaxLength(20);
         });
 
@@ -125,7 +127,9 @@ public partial class RestaurantContext : DbContext
 
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.OrderId).HasColumnName("Order_Id");
-            entity.Property(e => e.Price).HasMaxLength(20);
+            entity.Property(e => e.Price)
+            .HasColumnType("decimal(18, 2)")
+                .HasColumnName("Price");
             entity.Property(e => e.Quantity).HasMaxLength(20);
 
             entity.HasOne(d => d.Order).WithMany()
